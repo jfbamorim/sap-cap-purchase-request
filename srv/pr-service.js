@@ -123,5 +123,6 @@ module.exports = cds.service.impl(async function(srv) {
         if(pr.status !== 'D'){
             return req.error(400, 'Only DRAFT requests can be cancelled')
         }
+        await UPDATE('PurchaseRequests').set({ status: 'C' }).where({ id: id })
     })
 })
