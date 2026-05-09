@@ -26,6 +26,32 @@ module.exports = cds.service.impl(async function(srv) {
         if (pr.priority >= '3' && !pr.justification){
             return req.error(400, 'Justification is mandatory for high priority requests')
         }
+
+        //Update the PR status to S = Submitted
+        await UPDATE('PurchaseRequests').set({ status: 'S' }).where({ id: id })
+        
+        //Insert new line in Approval Logs
+        await INSERT.into('ApprovalLogs').values({
+            ID: cds.utils.uuid(),
+            pr_id: id,
+            action: 'S',
+            approverRole: 'Requester',
+            approvedBy: req.user.id,
+            valueAtTime: pr.totalValue
+        })
+
+        if(pr.totalValue <= APPROVAL_THRESHOLDS.AUTO){
+            //Update the PR status to A = Approved (automatically)
+            await UPDATE('PurchaseRequests').set({ status: 'A' }).where({ id: id })
+            await INSERT.into('ApprovalLogs').values({
+                ID: cds.utils.uuid(),
+                pr_id: id,
+                action: 'A',
+                approverRole: 'SYSTEM',
+                approvedBy: 'SYSTEM',
+                valueAtTime: pr.totalValue
+            })
+        }
     }),
 
     srv.before(['CREATE', 'UPDATE'], 'PurchaseRequestItems', async (req) => {
