@@ -1,0 +1,9 @@
+id,code,name,country,contactEmail,isPreferred,isActive
+22222222-2222-2222-2222-000000000001,SUP-001,Bosch Automotive Portugal,PT,procurement@bosch.pt,true,true
+22222222-2222-2222-2222-000000000002,SUP-002,Continental Mabor,PT,supplies@continental.pt,true,true
+22222222-2222-2222-2222-000000000003,SUP-003,Yazaki Saltano,PT,orders@yazaki.pt,false,true
+22222222-2222-2222-2222-000000000004,SUP-004,Faurecia Exhaust,FR,purchasing@faurecia.fr,true,true
+22222222-2222-2222-2222-000000000005,SUP-005,SKF Bearings Iberia,ES,orders@skf.es,false,true
+22222222-2222-2222-2222-000000000006,SUP-006,3M Industrial Portugal,PT,industrial@3m.pt,false,true
+22222222-2222-2222-2222-000000000007,SUP-007,Fanuc Robotics Europe,DE,service@fanuc.de,true,true
+22222222-2222-2222-2222-000000000008,SUP-008,Repsol Lubricantes,ES,lubricants@repsol.es,false,true

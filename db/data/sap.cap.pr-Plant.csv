@@ -1,0 +1,5 @@
+id,code,name,country,timezone,managerId
+44444444-4444-4444-4444-000000000001,PLT1,Palmela Assembly Plant,PT,Europe/Lisbon,MGR001
+44444444-4444-4444-4444-000000000002,PLT2,Setubal Engine Plant,PT,Europe/Lisbon,MGR002
+44444444-4444-4444-4444-000000000003,PLT3,Barcelona Stamping Plant,ES,Europe/Madrid,MGR003
+44444444-4444-4444-4444-000000000004,PLT4,Munchen R&D Centre,DE,Europe/Berlin,MGR004
