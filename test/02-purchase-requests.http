@@ -1,0 +1,64 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Purchase Requests – CRUD
+# ──────────────────────────────────────────────────────────────────────────────
+
+@baseUrl = http://localhost:4004/odata/v4/pr
+
+### GET all Purchase Requests
+GET {{baseUrl}}/PurchaseRequests
+
+### GET Purchase Requests expanded with items and approval logs
+GET {{baseUrl}}/PurchaseRequests?$expand=items,approvalLogs
+
+### GET single PR – DRAFT
+GET {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000005)
+
+### GET single PR – SUBMITTED (awaiting Purchasing Manager)
+GET {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000003)
+
+### GET single PR – APPROVED (auto-approved)
+GET {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000001)
+
+### GET single PR – REJECTED
+GET {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000007)
+
+### GET single PR – CANCELLED
+GET {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000006)
+
+### GET PRs filtered by status DRAFT
+GET {{baseUrl}}/PurchaseRequests?$filter=status eq 'D'
+
+### GET PRs filtered by status SUBMITTED
+GET {{baseUrl}}/PurchaseRequests?$filter=status eq 'S'
+
+### GET PRs ordered by totalValue descending
+GET {{baseUrl}}/PurchaseRequests?$orderby=totalValue desc
+
+### CREATE new PR – valid
+POST {{baseUrl}}/PurchaseRequests
+Content-Type: application/json
+
+{
+    "title": "Test PR – Hydraulic Filters",
+    "description": "Monthly supply of hydraulic filters for Palmela plant",
+    "priority": "2",
+    "currency": "EUR",
+    "requiredDate": "2026-06-01",
+    "plant_id": "44444444-4444-4444-4444-000000000001",
+    "costCenter_id": "33333333-3333-3333-3333-000000000001",
+    "requestedBy": "jsmith"
+}
+
+### CREATE new PR – missing required field (title)
+# Expected: 400 error
+POST {{baseUrl}}/PurchaseRequests
+Content-Type: application/json
+
+{
+    "priority": "2",
+    "currency": "EUR",
+    "requiredDate": "2026-06-01",
+    "plant_id": "44444444-4444-4444-4444-000000000001",
+    "costCenter_id": "33333333-3333-3333-3333-000000000001",
+    "requestedBy": "jsmith"
+}

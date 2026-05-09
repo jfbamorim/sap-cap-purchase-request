@@ -1,0 +1,120 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# PR Lifecycle Actions
+# ──────────────────────────────────────────────────────────────────────────────
+
+@baseUrl = http://localhost:4004/odata/v4/pr
+
+# ── submitPR ─────────────────────────────────────────────────────────────────
+
+### VAL-01 – Submit PR with no items
+# Expected: 400 – A Purchase Request must have at least one item
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000005)/PRService.submitPR
+Content-Type: application/json
+
+{}
+
+### VAL-02 – Submit PR with past required date
+# Expected: 400 – Required date must be in the future
+# (Edit seed data requiredDate to a past date to test this)
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000005)/PRService.submitPR
+Content-Type: application/json
+
+{}
+
+### VAL-03 – Submit HIGH priority PR without justification
+# Expected: 400 – Justification is mandatory for high priority requests
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000005)/PRService.submitPR
+Content-Type: application/json
+
+{}
+
+### Submit valid PR – auto-approval (totalValue <= 1000)
+# Expected: status changes to 'A', two ApprovalLog entries (S + A by SYSTEM)
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000001)/PRService.submitPR
+Content-Type: application/json
+
+{}
+
+### Submit valid PR – awaiting Department Manager (totalValue 1000-10000)
+# Expected: status changes to 'S', one ApprovalLog entry
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000005)/PRService.submitPR
+Content-Type: application/json
+
+{}
+
+# ── approvePR ────────────────────────────────────────────────────────────────
+
+### VAL-06 – Approve with insufficient role (value > 10000, role = DepartmentManager)
+# Expected: 403 – Insufficient authorization for this approval value
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000003)/PRService.approvePR
+Content-Type: application/json
+
+{
+    "comments": "Approved",
+    "approverRole": "DepartmentManager"
+}
+
+### Approve PR – valid (Purchasing Manager, value 10000-50000)
+# Expected: status changes to 'A', ApprovalLog entry created
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000003)/PRService.approvePR
+Content-Type: application/json
+
+{
+    "comments": "Approved – budget confirmed",
+    "approverRole": "PurchasingManager"
+}
+
+### Approve PR – valid (Plant Manager, value > 50000)
+# Expected: status changes to 'A', ApprovalLog entry created
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000004)/PRService.approvePR
+Content-Type: application/json
+
+{
+    "comments": "Approved – strategic investment",
+    "approverRole": "PlantManager"
+}
+
+# ── rejectPR ─────────────────────────────────────────────────────────────────
+
+### VAL-07 – Reject without reason
+# Expected: 400 – A rejection reason must be provided (min. 10 characters)
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000002)/PRService.rejectPR
+Content-Type: application/json
+
+{
+    "reason": "No"
+}
+
+### VAL-07 – Reject with reason too short (< 10 chars)
+# Expected: 400 – A rejection reason must be provided (min. 10 characters)
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000002)/PRService.rejectPR
+Content-Type: application/json
+
+{
+    "reason": "Too cheap"
+}
+
+### Reject PR – valid
+# Expected: status changes to 'R', ApprovalLog entry created
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000002)/PRService.rejectPR
+Content-Type: application/json
+
+{
+    "reason": "Supplier not approved for this material category"
+}
+
+# ── cancelPR ─────────────────────────────────────────────────────────────────
+
+### VAL-08 – Cancel SUBMITTED PR
+# Expected: 400 – Only DRAFT requests can be cancelled
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000002)/PRService.cancelPR
+Content-Type: application/json
+
+{}
+
+### Cancel DRAFT PR – valid
+# Expected: status changes to 'C'
+POST {{baseUrl}}/PurchaseRequests(55555555-5555-5555-5555-000000000005)/PRService.cancelPR
+Content-Type: application/json
+
+{}

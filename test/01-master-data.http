@@ -1,0 +1,23 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Master Data – GET Endpoints
+# ──────────────────────────────────────────────────────────────────────────────
+
+@baseUrl = http://localhost:4004/odata/v4/pr
+
+### GET all Plants
+GET {{baseUrl}}/Plants
+
+### GET all Cost Centers
+GET {{baseUrl}}/CostCenters
+
+### GET all Suppliers
+GET {{baseUrl}}/Suppliers
+
+### GET all Materials
+GET {{baseUrl}}/Materials
+
+### GET single Material (critical)
+GET {{baseUrl}}/Materials(11111111-1111-1111-1111-000000000003)
+
+### GET all Approval Logs
+GET {{baseUrl}}/ApprovalLogs
