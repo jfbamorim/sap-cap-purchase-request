@@ -84,14 +84,36 @@ module.exports = cds.service.impl(async function(srv) {
         if (pr.totalValue > APPROVAL_THRESHOLDS.AUTO && approverRole !== 'DepartmentManager' && approverRole !== 'PurchasingManager' && approverRole !== 'PlantManager') {
             return req.error(403, 'Insufficient authorization for this approval value')
         }
+
+        await UPDATE('PurchaseRequests').set({ status: 'A' }).where({ id: id })
+        await INSERT.into('ApprovalLogs').values({
+            ID: cds.utils.uuid(),
+            pr_id: id,
+            action: 'A',
+            approverRole: 'Manager',
+            approvedBy: 'manager',
+            valueAtTime: pr.totalValue
+        })
     }),
 
     srv.on('rejectPR', 'PurchaseRequests', async (req) => {
         //Validation - A rejection reason must be provided (min. 10 characters)
+        const id = req.params[0].id
+        const pr = await SELECT.one.from('PurchaseRequests').where({ id: id })
         const { reason } = req.data
         if (!reason || reason.length < 10){
             return req.error(400, 'A rejection reason must be provided (min. 10 characters)')
         }
+
+        await UPDATE('PurchaseRequests').set({ status: 'R' }).where({ id: id })
+        await INSERT.into('ApprovalLogs').values({
+            ID: cds.utils.uuid(),
+            pr_id: id,
+            action: 'R',
+            approverRole: 'Requester',
+            approvedBy: req.user.id,
+            valueAtTime: pr.totalValue
+        })
     }),
 
     srv.on('cancelPR', 'PurchaseRequests', async (req) => {
