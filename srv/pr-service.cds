@@ -4,6 +4,7 @@ service PRService{
     entity PurchaseRequests as projection on db.PurchaseRequest
     actions {
         action submitPR() returns String;
+        action approvePR(comments: String, approverRole: String) returns String;
     };
     entity PurchaseRequestItems as projection on db.PurchaseRequestItem;
     @readonly entity Material as projection on db.Material;

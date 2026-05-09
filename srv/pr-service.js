@@ -1,5 +1,11 @@
 const cds = require('@sap/cds');
 
+const APPROVAL_THRESHOLDS = {
+    AUTO:       1000,
+    DEPT_MGR:   10000,
+    PURCH_MGR:  50000
+}
+
 module.exports = cds.service.impl(async function(srv) {
     srv.on('submitPR', 'PurchaseRequests', async (req) => {
         //Validation - Purchase Request must have at least one item
@@ -19,6 +25,38 @@ module.exports = cds.service.impl(async function(srv) {
         //Validation - Justification is mandatory for high priority requests
         if (pr.priority >= '3' && !pr.justification){
             return req.error(400, 'Justification is mandatory for high priority requests')
+        }
+    }),
+
+    srv.before(['CREATE', 'UPDATE'], 'PurchaseRequestItems', async (req) => {
+        //Validation - Quantity and unit price must be positive values
+        const { quantity, unitPrice } = req.data
+        if (quantity <= 0 || unitPrice <= 0) {
+            return req.error(400, 'Quantity and unit price must be positive values')
+        }
+
+        //Validation - Critical materials require a preferred supplier
+        const { material_id, supplier_id } = req.data
+        const material = await SELECT.one.from('Material').where({ id: material_id })
+        if (material.isCritical && !supplier_id){
+            return req.error(400, 'Critical materials require a preferred supplier')
+        }
+    }),
+
+    srv.on('approvePR', 'PurchaseRequests', async (req) => {
+        //Insufficient authorization for this approval value
+        const id = req.params[0].id
+        const { comments, approverRole } = req.data
+        const pr = await SELECT.one.from('PurchaseRequests').where({ id: id })
+
+        if (pr.totalValue > APPROVAL_THRESHOLDS.PURCH_MGR && approverRole !== 'PlantManager') {
+            return req.error(403, 'Insufficient authorization for this approval value')
+        }
+        if (pr.totalValue > APPROVAL_THRESHOLDS.DEPT_MGR && approverRole !== 'PurchasingManager' && approverRole !== 'PlantManager') {
+            return req.error(403, 'Insufficient authorization for this approval value')
+        }
+        if (pr.totalValue > APPROVAL_THRESHOLDS.AUTO && approverRole !== 'DepartmentManager' && approverRole !== 'PurchasingManager' && approverRole !== 'PlantManager') {
+            return req.error(403, 'Insufficient authorization for this approval value')
         }
     })
 })
