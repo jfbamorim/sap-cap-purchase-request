@@ -58,5 +58,22 @@ module.exports = cds.service.impl(async function(srv) {
         if (pr.totalValue > APPROVAL_THRESHOLDS.AUTO && approverRole !== 'DepartmentManager' && approverRole !== 'PurchasingManager' && approverRole !== 'PlantManager') {
             return req.error(403, 'Insufficient authorization for this approval value')
         }
+    }),
+
+    srv.on('rejectPR', 'PurchaseRequests', async (req) => {
+        //Validation - A rejection reason must be provided (min. 10 characters)
+        const { reason } = req.data
+        if (!reason || reason.length < 10){
+            return req.error(400, 'A rejection reason must be provided (min. 10 characters)')
+        }
+    }),
+
+    srv.on('cancelPR', 'PurchaseRequests', async (req) => {
+        //Validation - Only DRAFT requests can be cancelled
+        const id = req.params[0].id
+        const pr = await SELECT.one.from('PurchaseRequests').where({ id: id })
+        if(pr.status !== 'D'){
+            return req.error(400, 'Only DRAFT requests can be cancelled')
+        }
     })
 })

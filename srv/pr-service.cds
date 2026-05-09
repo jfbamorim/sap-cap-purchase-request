@@ -5,6 +5,8 @@ service PRService{
     actions {
         action submitPR() returns String;
         action approvePR(comments: String, approverRole: String) returns String;
+        action rejectPR(reason: String) returns String;
+        action cancelPR() returns String;
     };
     entity PurchaseRequestItems as projection on db.PurchaseRequestItem;
     @readonly entity Material as projection on db.Material;
